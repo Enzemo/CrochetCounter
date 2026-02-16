@@ -34,6 +34,23 @@
         .btn-reset { background: transparent; border: 1px solid #888; color: #888; width: 100%; padding: 10px; margin-top: 20px; }
         .btn-del { background: transparent; color: #ff5252; padding: 5px; font-size: 1.1rem; }
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .btn-lock {
+    background: transparent;
+    font-size: 1.2rem;
+    padding: 5px;
+    margin-right: 10px;
+    opacity: 0.6;
+    transition: 0.3s;
+}
+.btn-lock.locked {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+.controls.locked {
+    pointer-events: none; /* Disables all clicks on the buttons */
+    opacity: 0.4;
+}
     </style>
 
 
@@ -77,6 +94,14 @@
     }
 
     function addCounter() {
+
+        counters.push({ 
+    name: name, 
+    count: 0, 
+    goal: goal, 
+    lastUpdated: 'Never',
+    locked: false // Add this line
+});
         const name = prompt("What are you tracking?", "Project Name");
         const goal = parseInt(prompt("What is your target amount of rows? (Number)", "10"));
         if (name && !isNaN(goal)) {
@@ -110,32 +135,45 @@
         }
     }
 
-    function render() {
-        const list = document.getElementById('counter-list');
-        list.innerHTML = '';
-        counters.forEach((c, i) => {
-            const progress = Math.min(100, (c.count / c.goal) * 100);
-            list.innerHTML += `
-                <div class="counter-card">
-                    <div class="counter-info">
-                        <div>
-                            <div class="counter-name">${c.name}</div>
-                            <div class="history">Last update: ${c.lastUpdated}</div>
-                        </div>
+    function toggleLock(index) {
+    counters[index].locked = !counters[index].locked;
+    save();
+}
+
+function render() {
+    const list = document.getElementById('counter-list');
+    list.innerHTML = '';
+    counters.forEach((c, i) => {
+        const progress = Math.min(100, (c.count / c.goal) * 100);
+        // Set lock icon based on state
+        const lockIcon = c.locked ? '🔒' : '🔓';
+        const lockClass = c.locked ? 'locked' : '';
+
+        list.innerHTML += `
+            <div class="counter-card">
+                <div class="counter-info">
+                    <div>
+                        <div class="counter-name">${c.name}</div>
+                        <div class="history">Last update: ${c.lastUpdated}</div>
+                    </div>
+                    <div>
+                        <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
                         <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
                     </div>
-                    <div class="controls">
-                        <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
-                        <span class="count-display">${c.count}</span>
-                        <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: ${progress}%"></div>
-                    </div>
-                    <div class="goal-text">${c.count} / ${c.goal} target</div>
                 </div>
-            `;
-        });
+                <div class="controls ${lockClass}">
+                    <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
+                    <span class="count-display">${c.count}</span>
+                    <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+                <div class="goal-text">${c.count} / ${c.goal} target</div>
+            </div>
+        `;
+    });
+}
     }
 
     render();
