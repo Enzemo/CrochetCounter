@@ -3,19 +3,19 @@
   "name": "Enzemo Crochet Counter",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3602/3602145.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/5839/5839450.png?v=2",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3602/3602145.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/5839/5839450.png?v=2",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "index.html?home=true",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3"
