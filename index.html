@@ -141,6 +141,144 @@
     render();
 </script>
 
+<style>
+    /* Styling for the Expandable Instructions */
+    .install-guide {
+        margin-top: 30px;
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--card);
+    }
+    .install-header {
+        background: rgba(0,0,0,0.05);
+        padding: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .install-content {
+        display: none;
+        padding: 15px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        border-top: 1px solid #eee;
+    }
+    .install-content h4 { margin: 10px 0 5px 0; color: var(--primary); }
+    .install-content ol { padding-left: 20px; }
+    .install-content li { margin-bottom: 8px; }
+</style>
+
+<div class="install-guide">
+    <div class="install-header" onclick="toggleGuide()">
+        <span>How to install this as an app</span>
+        <span id="guide-arrow">▼</span>
+    </div>
+    <div class="install-content" id="guide-content">
+        <h4>Android (Chrome/Firefox)</h4>
+        <ol>
+            <li>Tap the <b>three dots (⋮)</b> in the top right corner.</li>
+            <li>Select <b>"Install app"</b> or <b>"Add to Home screen"</b>.</li>
+            <li>Follow the prompt to add it to your app drawer.</li>
+        </ol>
+
+        <h4>iPhone (Safari)</h4>
+        <ol>
+            <li>Tap the <b>Share icon</b> (square with an up arrow) at the bottom.</li>
+            <li>Scroll down and tap <b>"Add to Home Screen"</b>.</li>
+            <li>Tap <b>Add</b> in the top right corner.</li>
+        </ol>
+        <p style="font-size: 0.8rem; color: #888;">Note: This runs locally and saves data to your browser storage.</p>
+    </div>
+</div>
+
+<script>
+    // Toggle Function for the Guide
+    function toggleGuide() {
+        const content = document.getElementById('guide-content');
+        const arrow = document.getElementById('guide-arrow');
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            arrow.innerText = "▼";
+        } else {
+            content.style.display = "block";
+            arrow.innerText = "▲";
+        }
+    }
+</script><style>
+    /* Styling for the Expandable Instructions */
+    .install-guide {
+        margin-top: 30px;
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--card);
+    }
+    .install-header {
+        background: rgba(0,0,0,0.05);
+        padding: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .install-content {
+        display: none;
+        padding: 15px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        border-top: 1px solid #eee;
+    }
+    .install-content h4 { margin: 10px 0 5px 0; color: var(--primary); }
+    .install-content ol { padding-left: 20px; }
+    .install-content li { margin-bottom: 8px; }
+</style>
+
+<div class="install-guide">
+    <div class="install-header" onclick="toggleGuide()">
+        <span>How to install this as an app</span>
+        <span id="guide-arrow">▼</span>
+    </div>
+    <div class="install-content" id="guide-content">
+        <h4>Android (Chrome/Firefox)</h4>
+        <ol>
+            <li>Tap the <b>three dots (⋮)</b> in the top right corner.</li>
+            <li>Select <b>"Install app"</b> or <b>"Add to Home screen"</b>.</li>
+            <li>Follow the prompt to add it to your app drawer.</li>
+        </ol>
+
+        <h4>iPhone (Safari)</h4>
+        <ol>
+            <li>Tap the <b>Share icon</b> (square with an up arrow) at the bottom.</li>
+            <li>Scroll down and tap <b>"Add to Home Screen"</b>.</li>
+            <li>Tap <b>Add</b> in the top right corner.</li>
+        </ol>
+        <p style="font-size: 0.8rem; color: #888;">Note: This runs locally and saves data to your browser storage.</p>
+    </div>
+</div>
+
+<script>
+    // Toggle Function for the Guide
+    function toggleGuide() {
+        const content = document.getElementById('guide-content');
+        const arrow = document.getElementById('guide-arrow');
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            arrow.innerText = "▼";
+        } else {
+            content.style.display = "block";
+            arrow.innerText = "▲";
+        }
+    }
+</script>
+    
     <a href="https://www.flaticon.com/free-icons/crochet" title="crochet icons">Crochet icons created by PIXARTIST - Flaticon</a>
 </body>
 </html>
