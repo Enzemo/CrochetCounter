@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crochet Stitch Counter</title>
     <style>
+
+
+        
         :root { --bg: #f4f4f9; --card: #ffffff; --text: #333; --primary: #2196F3; --accent: #4CAF50; }
         body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #bb86fc; --accent: #03dac6; }
         
@@ -53,6 +56,11 @@
         .install-content { display: none; padding: 15px; font-size: 0.9rem; line-height: 1.5; border-top: 1px solid #88888833; }
         
         .attribution { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-decoration: none; color: var(--text); }
+
+                /* Hides the delete button when the parent container is locked */
+        .is-locked + .btn-del {
+            display: none;
+        }
     </style>
 
     <link rel="manifest" href="manifest.json?v=3">
@@ -162,38 +170,39 @@
     }
 
     function render() {
-        const list = document.getElementById('counter-list');
-        list.innerHTML = '';
-        counters.forEach((c, i) => {
-            const progress = Math.min(100, (c.count / c.goal) * 100);
-            const lockIcon = c.locked ? '🔒' : '🔓';
-            const lockClass = c.locked ? 'is-locked' : '';
-            const controlClass = c.locked ? 'locked' : '';
+    const list = document.getElementById('counter-list');
+    list.innerHTML = '';
+    counters.forEach((c, i) => {
+        const progress = Math.min(100, (c.count / c.goal) * 100);
+        const lockIcon = c.locked ? '🔒' : '🔓';
+        const lockClass = c.locked ? 'is-locked' : '';
+        const controlClass = c.locked ? 'locked' : '';
 
-            list.innerHTML += `
-                <div class="counter-card">
-                    <div class="counter-info">
-                        <div>
-                            <div class="counter-name">${c.name}</div>
-                            <div class="history">Last update: ${c.lastUpdated}</div>
-                        </div>
-                        <div>
-                            <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
-                            <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
-                        </div>
+        list.innerHTML += `
+            <div class="counter-card">
+                <div class="counter-info">
+                    <div>
+                        <div class="counter-name">${c.name}</div>
+                        <div class="history">Last update: ${c.lastUpdated}</div>
                     </div>
-                    <div class="controls ${controlClass}">
-                        <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
-                        <span class="count-display">${c.count}</span>
-                        <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
+                    <div style="display: flex; align-items: center;">
+                        <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
+                        ${!c.locked ? `<button class="btn-del" onclick="deleteCounter(${i})">✕</button>` : ''}
                     </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: ${progress}%"></div>
-                    </div>
-                    <div class="goal-text">${c.count} / ${c.goal} target</div>
                 </div>
-            `;
-        });
+                <div class="controls ${controlClass}">
+                    <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
+                    <span class="count-display">${c.count}</span>
+                    <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+                <div class="goal-text">${c.count} / ${c.goal} target</div>
+            </div>
+        `;
+    });
+}
     }
 
     render();
