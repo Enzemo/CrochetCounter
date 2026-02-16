@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crochet Stitch Counter</title>
     <style>
         :root { --bg: #f4f4f9; --card: #ffffff; --text: #333; --primary: #2196F3; --accent: #4CAF50; }
         body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #bb86fc; --accent: #03dac6; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; margin: 0; }
+        
+        body { 
+            font-family: sans-serif; background: var(--bg); color: var(--text); 
+            padding: 15px; display: flex; flex-direction: column; align-items: center; 
+            transition: 0.3s; margin: 0; 
+        }
+        
         .container { width: 100%; max-width: 450px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; }
+        .counter-card { 
+            background: var(--card); padding: 20px; border-radius: 16px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; 
+        }
+        
         .counter-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
         .counter-name { font-size: 1.2rem; font-weight: bold; }
         .history { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
         
-        .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; }
+        .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; transition: 0.3s; }
+        .controls.locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
+        
         .count-display { font-size: 3rem; font-weight: 800; color: var(--primary); }
         
         .progress-container { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
@@ -33,33 +42,22 @@
         .btn-new { background: var(--primary); color: white; width: 100%; padding: 15px; margin-bottom: 10px; font-size: 1rem; }
         .btn-reset { background: transparent; border: 1px solid #888; color: #888; width: 100%; padding: 10px; margin-top: 20px; }
         .btn-del { background: transparent; color: #ff5252; padding: 5px; font-size: 1.1rem; }
+        .btn-lock { background: transparent; font-size: 1.2rem; padding: 5px; margin-right: 5px; opacity: 0.5; }
+        .btn-lock.is-locked { opacity: 1; }
+        
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .btn-lock {
-    background: transparent;
-    font-size: 1.2rem;
-    padding: 5px;
-    margin-right: 10px;
-    opacity: 0.6;
-    transition: 0.3s;
-}
-.btn-lock.locked {
-    opacity: 1;
-    filter: drop-shadow(0 0 5px var(--primary));
-}
-.controls.locked {
-    pointer-events: none; /* Disables all clicks on the buttons */
-    opacity: 0.4;
-}
+        /* Guide Styling */
+        .install-guide { margin-top: 30px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
+        .install-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
+        .install-content { display: none; padding: 15px; font-size: 0.9rem; line-height: 1.5; border-top: 1px solid #88888833; }
+        
+        .attribution { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-decoration: none; color: var(--text); }
     </style>
 
-
-    <link rel="manifest" href="manifest.json?v=2">
+    <link rel="manifest" href="manifest.json?v=3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2196F3">
-
-
-    
 </head>
 <body class="dark-mode">
 
@@ -73,6 +71,27 @@
     
     <button class="btn-new" onclick="addCounter()">+ Create New Project</button>
     <button class="btn-reset" onclick="resetAll()">Reset All Values</button>
+
+    <div class="install-guide">
+        <div class="install-header" onclick="toggleGuide()">
+            <span>How to install this as an app</span>
+            <span id="guide-arrow">▼</span>
+        </div>
+        <div class="install-content" id="guide-content">
+            <h4>Android (Chrome/Firefox)</h4>
+            <ol>
+                <li>Tap the <b>three dots (⋮)</b> in the top right.</li>
+                <li>Select <b>"Install app"</b> or <b>"Add to Home screen"</b>.</li>
+            </ol>
+            <h4>iPhone (Safari)</h4>
+            <ol>
+                <li>Tap the <b>Share icon</b> (square with up arrow).</li>
+                <li>Tap <b>"Add to Home Screen"</b>.</li>
+            </ol>
+        </div>
+    </div>
+
+    <a href="https://www.flaticon.com/free-icons/crochet" class="attribution">Crochet icons created by PIXARTIST - Flaticon</a>
 </div>
 
 <script>
@@ -94,30 +113,29 @@
     }
 
     function addCounter() {
-
-        counters.push({ 
-    name: name, 
-    count: 0, 
-    goal: goal, 
-    lastUpdated: 'Never',
-    locked: false // Add this line
-});
-        const name = prompt("What are you tracking?", "Project Name");
-        const goal = parseInt(prompt("What is your target amount of rows? (Number)", "10"));
+        const name = prompt("Project Name?", "Beanie");
+        const goal = parseInt(prompt("Target rows/stitches?", "50"));
         if (name && !isNaN(goal)) {
             counters.push({ 
                 name: name, 
                 count: 0, 
                 goal: goal, 
-                lastUpdated: 'Never' 
+                lastUpdated: 'Never',
+                locked: false 
             });
             save();
         }
     }
 
     function updateCount(index, delta) {
+        if (counters[index].locked) return;
         counters[index].count = Math.max(0, counters[index].count + delta);
         counters[index].lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        save();
+    }
+
+    function toggleLock(index) {
+        counters[index].locked = !counters[index].locked;
         save();
     }
 
@@ -135,120 +153,52 @@
         }
     }
 
-    function toggleLock(index) {
-    counters[index].locked = !counters[index].locked;
-    save();
-}
+    function toggleGuide() {
+        const content = document.getElementById('guide-content');
+        const arrow = document.getElementById('guide-arrow');
+        const isOpen = content.style.display === "block";
+        content.style.display = isOpen ? "none" : "block";
+        arrow.innerText = isOpen ? "▼" : "▲";
+    }
 
-function render() {
-    const list = document.getElementById('counter-list');
-    list.innerHTML = '';
-    counters.forEach((c, i) => {
-        const progress = Math.min(100, (c.count / c.goal) * 100);
-        // Set lock icon based on state
-        const lockIcon = c.locked ? '🔒' : '🔓';
-        const lockClass = c.locked ? 'locked' : '';
+    function render() {
+        const list = document.getElementById('counter-list');
+        list.innerHTML = '';
+        counters.forEach((c, i) => {
+            const progress = Math.min(100, (c.count / c.goal) * 100);
+            const lockIcon = c.locked ? '🔒' : '🔓';
+            const lockClass = c.locked ? 'is-locked' : '';
+            const controlClass = c.locked ? 'locked' : '';
 
-        list.innerHTML += `
-            <div class="counter-card">
-                <div class="counter-info">
-                    <div>
-                        <div class="counter-name">${c.name}</div>
-                        <div class="history">Last update: ${c.lastUpdated}</div>
+            list.innerHTML += `
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <div>
+                            <div class="counter-name">${c.name}</div>
+                            <div class="history">Last update: ${c.lastUpdated}</div>
+                        </div>
+                        <div>
+                            <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
+                            <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
-                        <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
+                    <div class="controls ${controlClass}">
+                        <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
+                        <span class="count-display">${c.count}</span>
+                        <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
                     </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="goal-text">${c.count} / ${c.goal} target</div>
                 </div>
-                <div class="controls ${lockClass}">
-                    <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
-                    <span class="count-display">${c.count}</span>
-                    <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <div class="goal-text">${c.count} / ${c.goal} target</div>
-            </div>
-        `;
-    });
-}
+            `;
+        });
     }
 
     render();
 </script>
 
-<style>
-    /* Styling for the Expandable Instructions */
-    .install-guide {
-        margin-top: 30px;
-        width: 100%;
-        max-width: 400px;
-        border: 1px solid #ccc;
-        border-radius: 12px;
-        overflow: hidden;
-        background: var(--card);
-    }
-    .install-header {
-        background: rgba(0,0,0,0.05);
-        padding: 12px;
-        cursor: pointer;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .install-content {
-        display: none;
-        padding: 15px;
-        font-size: 0.9rem;
-        line-height: 1.5;
-        border-top: 1px solid #eee;
-    }
-    .install-content h4 { margin: 10px 0 5px 0; color: var(--primary); }
-    .install-content ol { padding-left: 20px; }
-    .install-content li { margin-bottom: 8px; }
-</style>
-
-<div class="install-guide">
-    <div class="install-header" onclick="toggleGuide()">
-        <span>How to install this as an app</span>
-        <span id="guide-arrow">▼</span>
-    </div>
-    <div class="install-content" id="guide-content">
-        <h4>Android (Chrome/Firefox)</h4>
-        <ol>
-            <li>Tap the <b>three dots (⋮)</b> in the top right corner.</li>
-            <li>Select <b>"Install app"</b> or <b>"Add to Home screen"</b>.</li>
-            <li>Follow the prompt to add it to your app drawer.</li>
-        </ol>
-
-        <h4>iPhone (Safari)</h4>
-        <ol>
-            <li>Tap the <b>Share icon</b> (square with an up arrow) at the bottom.</li>
-            <li>Scroll down and tap <b>"Add to Home Screen"</b>.</li>
-            <li>Tap <b>Add</b> in the top right corner.</li>
-        </ol>
-        <p style="font-size: 0.8rem; color: #888;">Note: This runs locally and saves data to your browser storage.</p>
-    </div>
-</div>
-
-<script>
-    // Toggle Function for the Guide
-    function toggleGuide() {
-        const content = document.getElementById('guide-content');
-        const arrow = document.getElementById('guide-arrow');
-        if (content.style.display === "block") {
-            content.style.display = "none";
-            arrow.innerText = "▼";
-        } else {
-            content.style.display = "block";
-            arrow.innerText = "▲";
-        }
-    }
-</script>
-    
-    <a href="https://www.flaticon.com/free-icons/crochet" title="crochet icons">Crochet icons created by PIXARTIST - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/crochet" title="crochet icons">Crochet icons created by PIXARTIST - Flaticon</a>
 </body>
 </html>
