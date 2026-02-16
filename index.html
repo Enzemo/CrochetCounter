@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crochet Stitch Counter</title>
     <style>
-
-
-        
         :root { --bg: #f4f4f9; --card: #ffffff; --text: #333; --primary: #2196F3; --accent: #4CAF50; }
         body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #bb86fc; --accent: #03dac6; }
         
@@ -27,8 +24,15 @@
         
         .counter-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
         .counter-name { font-size: 1.2rem; font-weight: bold; }
-        .history { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
+        .history { font-size: 0.75rem; color: #888; margin-bottom: 10px; }
         
+        .notes-area {
+            width: 100%; background: rgba(0,0,0,0.05); border: none; border-radius: 8px;
+            padding: 8px; font-size: 0.85rem; color: var(--text); margin-bottom: 15px;
+            box-sizing: border-box; resize: vertical; font-family: inherit;
+        }
+        body.dark-mode .notes-area { background: rgba(255,255,255,0.05); }
+
         .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; transition: 0.3s; }
         .controls.locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
         
@@ -50,20 +54,14 @@
         
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* Guide Styling */
         .install-guide { margin-top: 30px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
         .install-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
         .install-content { display: none; padding: 15px; font-size: 0.9rem; line-height: 1.5; border-top: 1px solid #88888833; }
         
-        .attribution { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-decoration: none; color: var(--text); }
-
-                /* Hides the delete button when the parent container is locked */
-        .is-locked + .btn-del {
-            display: none;
-        }
+        .attribution { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-align: center; display: block; width: 100%; color: var(--text); text-decoration: none; }
     </style>
 
-    <link rel="manifest" href="manifest.json?v=3">
+    <link rel="manifest" href="manifest.json?v=4">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2196F3">
 </head>
@@ -129,7 +127,8 @@
                 count: 0, 
                 goal: goal, 
                 lastUpdated: 'Never',
-                locked: false 
+                locked: false,
+                notes: ''
             });
             save();
         }
@@ -140,6 +139,12 @@
         counters[index].count = Math.max(0, counters[index].count + delta);
         counters[index].lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         save();
+    }
+
+    function updateNotes(index, value) {
+        counters[index].notes = value;
+        localStorage.setItem('goalCounters', JSON.stringify(counters));
+        // We don't call render() here to avoid losing keyboard focus while typing
     }
 
     function toggleLock(index) {
@@ -170,44 +175,47 @@
     }
 
     function render() {
-    const list = document.getElementById('counter-list');
-    list.innerHTML = '';
-    counters.forEach((c, i) => {
-        const progress = Math.min(100, (c.count / c.goal) * 100);
-        const lockIcon = c.locked ? '🔒' : '🔓';
-        const lockClass = c.locked ? 'is-locked' : '';
-        const controlClass = c.locked ? 'locked' : '';
+        const list = document.getElementById('counter-list');
+        list.innerHTML = '';
+        counters.forEach((c, i) => {
+            const progress = Math.min(100, (c.count / c.goal) * 100);
+            const lockIcon = c.locked ? '🔒' : '🔓';
+            const lockClass = c.locked ? 'is-locked' : '';
+            const controlClass = c.locked ? 'locked' : '';
 
-        list.innerHTML += `
-            <div class="counter-card">
-                <div class="counter-info">
-                    <div>
-                        <div class="counter-name">${c.name}</div>
-                        <div class="history">Last update: ${c.lastUpdated}</div>
+            list.innerHTML += `
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <div>
+                            <div class="counter-name">${c.name}</div>
+                            <div class="history">Last update: ${c.lastUpdated}</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
+                            ${!c.locked ? `<button class="btn-del" onclick="deleteCounter(${i})">✕</button>` : ''}
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <button class="btn-lock ${lockClass}" onclick="toggleLock(${i})">${lockIcon}</button>
-                        ${!c.locked ? `<button class="btn-del" onclick="deleteCounter(${i})">✕</button>` : ''}
+                    
+                    <textarea class="notes-area" 
+                              placeholder="Notes (Hook size, pattern, etc...)" 
+                              oninput="updateNotes(${i}, this.value)"
+                              ${c.locked ? 'disabled' : ''}>${c.notes || ''}</textarea>
+
+                    <div class="controls ${controlClass}">
+                        <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
+                        <span class="count-display">${c.count}</span>
+                        <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
                     </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="goal-text">${c.count} / ${c.goal} target</div>
                 </div>
-                <div class="controls ${controlClass}">
-                    <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
-                    <span class="count-display">${c.count}</span>
-                    <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <div class="goal-text">${c.count} / ${c.goal} target</div>
-            </div>
-        `;
-    });
-}
+            `;
+        });
     }
 
     render();
 </script>
-
-
 </body>
 </html>
