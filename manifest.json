@@ -1,0 +1,15 @@
+{
+  "short_name": "Counter",
+  "name": "Enzemo Crochet Counter",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3566/3566511.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#2196F3"
+}
