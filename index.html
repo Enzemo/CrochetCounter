@@ -66,7 +66,7 @@
     }
 
     function addCounter() {
-        const name = prompt("What are you tracking?", "Rows");
+        const name = prompt("What are you tracking?", "Project Name");
         const goal = parseInt(prompt("What is your target amount of rows? (Number)", "10"));
         if (name && !isNaN(goal)) {
             counters.push({ 
