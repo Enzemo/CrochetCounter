@@ -43,7 +43,7 @@
     
     <div id="counter-list"></div>
     
-    <button class="btn-new" onclick="addCounter()">+ Create New Goal</button>
+    <button class="btn-new" onclick="addCounter()">+ Create New Project</button>
     <button class="btn-reset" onclick="resetAll()">Reset All Values</button>
 </div>
 
@@ -66,8 +66,8 @@
     }
 
     function addCounter() {
-        const name = prompt("What are you tracking?", "Steps");
-        const goal = parseInt(prompt("What is your target goal? (Number)", "10"));
+        const name = prompt("What are you tracking?", "Rows");
+        const goal = parseInt(prompt("What is your target amount of rows? (Number)", "10"));
         if (name && !isNaN(goal)) {
             counters.push({ 
                 name: name, 
@@ -93,7 +93,7 @@
     }
 
     function deleteCounter(index) {
-        if(confirm("Delete this goal?")) {
+        if(confirm("Delete this project?")) {
             counters.splice(index, 1);
             save();
         }
