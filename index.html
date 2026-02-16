@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Tracker</title>
+    <style>
+        :root { --bg: #f4f4f9; --card: #ffffff; --text: #333; --primary: #2196F3; --accent: #4CAF50; }
+        body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #bb86fc; --accent: #03dac6; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; margin: 0; }
+        .container { width: 100%; max-width: 450px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; }
+        .counter-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .counter-name { font-size: 1.2rem; font-weight: bold; }
+        .history { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
+        
+        .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; }
+        .count-display { font-size: 3rem; font-weight: 800; color: var(--primary); }
+        
+        .progress-container { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { background: var(--accent); height: 100%; transition: width 0.4s ease; width: 0%; }
+        .goal-text { font-size: 0.8rem; text-align: right; margin-top: 5px; opacity: 0.8; }
+
+        button { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-circle { width: 60px; height: 60px; font-size: 1.8rem; color: white; }
+        .btn-add { background: var(--accent); }
+        .btn-sub { background: #f44336; }
+        .btn-new { background: var(--primary); color: white; width: 100%; padding: 15px; margin-bottom: 10px; font-size: 1rem; }
+        .btn-reset { background: transparent; border: 1px solid #888; color: #888; width: 100%; padding: 10px; margin-top: 20px; }
+        .btn-del { background: transparent; color: #ff5252; padding: 5px; font-size: 1.1rem; }
+        .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="dark-mode">
+
+<div class="container">
+    <div class="header">
+        <h1>Tracker</h1>
+        <button class="mode-toggle" onclick="toggleDarkMode()">🌓</button>
+    </div>
+    
+    <div id="counter-list"></div>
+    
+    <button class="btn-new" onclick="addCounter()">+ Create New Goal</button>
+    <button class="btn-reset" onclick="resetAll()">Reset All Values</button>
+</div>
+
+<script>
+    let counters = JSON.parse(localStorage.getItem('goalCounters')) || [];
+    let isDark = localStorage.getItem('darkMode') !== 'false';
+
+    if (!isDark) document.body.classList.remove('dark-mode');
+
+    function save() {
+        localStorage.setItem('goalCounters', JSON.stringify(counters));
+        localStorage.setItem('darkMode', isDark);
+        render();
+    }
+
+    function toggleDarkMode() {
+        isDark = !isDark;
+        document.body.classList.toggle('dark-mode');
+        save();
+    }
+
+    function addCounter() {
+        const name = prompt("What are you tracking?", "Steps");
+        const goal = parseInt(prompt("What is your target goal? (Number)", "10"));
+        if (name && !isNaN(goal)) {
+            counters.push({ 
+                name: name, 
+                count: 0, 
+                goal: goal, 
+                lastUpdated: 'Never' 
+            });
+            save();
+        }
+    }
+
+    function updateCount(index, delta) {
+        counters[index].count = Math.max(0, counters[index].count + delta);
+        counters[index].lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        save();
+    }
+
+    function resetAll() {
+        if(confirm("Clear all progress?")) {
+            counters.forEach(c => { c.count = 0; c.lastUpdated = 'Reset just now'; });
+            save();
+        }
+    }
+
+    function deleteCounter(index) {
+        if(confirm("Delete this goal?")) {
+            counters.splice(index, 1);
+            save();
+        }
+    }
+
+    function render() {
+        const list = document.getElementById('counter-list');
+        list.innerHTML = '';
+        counters.forEach((c, i) => {
+            const progress = Math.min(100, (c.count / c.goal) * 100);
+            list.innerHTML += `
+                <div class="counter-card">
+                    <div class="counter-info">
+                        <div>
+                            <div class="counter-name">${c.name}</div>
+                            <div class="history">Last update: ${c.lastUpdated}</div>
+                        </div>
+                        <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
+                    </div>
+                    <div class="controls">
+                        <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
+                        <span class="count-display">${c.count}</span>
+                        <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="goal-text">${c.count} / ${c.goal} target</div>
+                </div>
+            `;
+        });
+    }
+
+    render();
+</script>
+
+</body>
+</html>
