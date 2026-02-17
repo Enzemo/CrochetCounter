@@ -17,7 +17,6 @@
         .counter-name { font-size: 1.2rem; font-weight: bold; }
         .history { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
         
-        /* Timer Styling */
         .timer-display { 
             font-size: 0.85rem; font-weight: bold; color: var(--accent); 
             margin-bottom: 15px; background: rgba(0,0,0,0.05);
@@ -124,7 +123,7 @@
                 goal: goal, 
                 lastUpdated: 'Never',
                 locked: false,
-                timerEnabled: false,
+                showTimer: false,
                 startTime: null,
                 sessionStartCount: 0
             });
@@ -136,8 +135,8 @@
         const c = counters[index];
         if (c.locked) return;
 
-        // Initialize timer start if moving forward
-        if (c.timerEnabled && delta > 0 && !c.startTime) {
+        // Background calculation tracking starts automatically on first increment
+        if (delta > 0 && !c.startTime) {
             c.startTime = Date.now();
             c.sessionStartCount = c.count;
         }
@@ -149,10 +148,6 @@
 
     function toggleUtility(index, property) {
         counters[index][property] = !counters[index][property];
-        // Reset timer session if disabled
-        if (property === 'timerEnabled' && !counters[index].timerEnabled) {
-            counters[index].startTime = null;
-        }
         save();
     }
 
@@ -202,10 +197,10 @@
         counters.forEach((c, i) => {
             const progress = Math.min(100, (c.count / (c.goal || 1)) * 100);
             
-            // Calculate Timer Rates
+            // Background Rate Calculations
             let rpm = "0.0";
             let rph = "0.0";
-            if (c.timerEnabled && c.startTime) {
+            if (c.startTime) {
                 const sessionRows = c.count - c.sessionStartCount;
                 const elapsedMins = (Date.now() - c.startTime) / 60000;
                 if (sessionRows > 0 && elapsedMins > 0) {
@@ -222,13 +217,13 @@
                             <div class="history">Last update: ${c.lastUpdated}</div>
                         </div>
                         <div>
-                            <button class="btn-utility ${c.timerEnabled ? 'active' : ''}" onclick="toggleUtility(${i}, 'timerEnabled')">⏱️</button>
+                            <button class="btn-utility ${c.showTimer ? 'active' : ''}" onclick="toggleUtility(${i}, 'showTimer')">⏱️</button>
                             <button class="btn-utility ${c.locked ? 'active' : ''}" onclick="toggleUtility(${i}, 'locked')">${c.locked ? '🔒' : '🔓'}</button>
                             <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
                         </div>
                     </div>
 
-                    <div class="timer-display" style="display: ${c.timerEnabled ? 'block' : 'none'}">
+                    <div class="timer-display" style="display: ${c.showTimer ? 'block' : 'none'}">
                         <b>Speed:</b> ${rpm} rows/min<br>
                         <b>Projected:</b> ${rph} rows/hour
                     </div>
@@ -248,12 +243,13 @@
         });
     }
 
-    // Auto-refresh timer rates every 30 seconds if any timer is running
+    // Always run calculations in background and refresh view
     setInterval(() => {
-        if (counters.some(c => c.timerEnabled && c.startTime)) render();
+        if (counters.some(c => c.startTime)) render();
     }, 30000);
 
     render();
 </script>
 </body>
 </html>
+ 
