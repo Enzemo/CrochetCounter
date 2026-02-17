@@ -44,7 +44,3 @@ A sleek, mobile-first web application designed for crocheters and knitters to tr
 * **Visual Effects:** Confetti powered by [canvas-confetti](https://github.com/catdad/canvas-confetti).
 * **Socials:** Follow the developer on Instagram [@EnzemoCrochet](https://www.instagram.com/EnzemoCrochet).
 * **AI Collaboration:** Initial structure and feature brainstorming assisted by Gemini AI.
-
-## 📄 License
-
-This project is licensed under the MIT License - feel free to use it and modify it for your own crafting needs!
