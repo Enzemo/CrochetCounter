@@ -80,6 +80,7 @@
         }
         .ext-link svg { width: 18px; height: 18px; fill: currentColor; }
         .attribution { font-size: 0.75rem; opacity: 0.5; color: var(--text); margin-top: 5px; }
+        .attribution a { color: inherit; text-decoration: underline; }
     </style>
 </head>
 <body class="dark-mode">
@@ -128,7 +129,7 @@
                 GitHub
             </a>
         </div>
-        <div class="attribution">Developed with Gemini AI</div>
+        <div class="attribution">Confetti effects by <a href="https://github.com/catdad/canvas-confetti" target="_blank">canvas-confetti</a></div>
     </div>
 </div>
 
@@ -209,7 +210,6 @@
     function shareProgress(index) {
         const c = counters[index];
         const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
-        // Updated Share Text: Removed third line
         const text = `🧶 Project Update: ${c.name}\n📍 Progress: ${c.count} / ${c.goal} rows (${progress}%)`;
         
         if (navigator.share) {
