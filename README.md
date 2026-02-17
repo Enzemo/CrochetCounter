@@ -15,7 +15,6 @@ A sleek, mobile-first web application designed for crocheters and knitters to tr
 
 * **Multi-Project Tracking:** Manage multiple crochet projects simultaneously with custom names and row goals.
 * **Live Productivity Stats:** Toggle a session timer to see your real-time speed (**Rows Per Minute/Hour**) and an **Estimated Completion Time** based on your current pace.
-* **Daily Progress Logs:** Automatically logs how many rows you complete each day so you can track your productivity over time.
 * **Mobile Optimized:** Designed to be "Installed as an App" (PWA style) on iOS and Android for quick access on your crafting desk.
 * **Smart Utilities:**
     * 📌 **Pinning:** Keep your current "Work in Progress" at the top.
