@@ -12,34 +12,22 @@
         .container { width: 100%; max-width: 450px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; border: 2px solid transparent; transition: 0.3s; overflow: hidden; }
-        .counter-card.pinned { border-color: var(--primary); }
-        .counter-card.archived { opacity: 0.6; filter: grayscale(0.5); }
-        .counter-card.completed { border-color: var(--accent); }
-
-        .project-img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; display: none; }
-        
+        .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; }
         .counter-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-        .counter-name { font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .history { font-size: 0.75rem; color: #888; margin-bottom: 10px; }
+        .counter-name { font-size: 1.2rem; font-weight: bold; }
+        .history { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
         
-        .timer-display { font-size: 0.85rem; font-weight: bold; color: var(--accent); margin-bottom: 10px; display: none; background: rgba(0,0,0,0.05); padding: 8px 12px; border-radius: 8px; border-left: 4px solid var(--accent); }
-        body.dark-mode .timer-display { background: rgba(255,255,255,0.05); }
-
         .sub-counters { margin-bottom: 15px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; }
+        body.dark-mode .sub-counters { background: rgba(255,255,255,0.05); }
         .sub-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .sub-btn { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; }
-
-        .notes-area { width: 100%; background: rgba(0,0,0,0.05); border: none; border-radius: 8px; padding: 8px; font-size: 0.85rem; color: var(--text); margin-bottom: 15px; box-sizing: border-box; resize: vertical; font-family: inherit; }
-        body.dark-mode .notes-area { background: rgba(255,255,255,0.05); }
+        .sub-btn { background: var(--primary); color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; margin-left: 5px; }
 
         .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; }
-        .controls.locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
         .count-display { font-size: 3rem; font-weight: 800; color: var(--primary); }
         
-        .progress-container { background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; position: relative; }
+        .progress-container { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: var(--accent); height: 100%; transition: width 0.4s ease; width: 0%; }
-        .goal-text { font-size: 0.8rem; text-align: right; margin-top: 5px; opacity: 0.8; font-weight: bold; }
+        .goal-text { font-size: 0.8rem; text-align: right; margin-top: 5px; opacity: 0.8; }
 
         button { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-circle { width: 60px; height: 60px; font-size: 1.8rem; color: white; }
@@ -47,26 +35,16 @@
         .btn-sub { background: #f44336; }
         .btn-new { background: var(--primary); color: white; width: 100%; padding: 15px; margin-bottom: 10px; font-size: 1rem; }
         .btn-reset { background: transparent; border: 1px solid #888; color: #888; width: 100%; padding: 10px; margin-top: 20px; }
-        
-        .btn-utility { background: transparent; font-size: 1.2rem; padding: 5px; opacity: 0.5; }
-        .btn-utility.active { opacity: 1; filter: drop-shadow(0 0 3px var(--primary)); }
-        .btn-action { background: rgba(0,0,0,0.05); color: var(--text); padding: 6px 10px; font-size: 0.75rem; border-radius: 6px; margin-top: 5px; }
+        .btn-del { background: transparent; color: #ff5252; padding: 5px; font-size: 1.1rem; }
+        .btn-lock { background: transparent; font-size: 1.2rem; padding: 5px; margin-right: 10px; opacity: 0.6; }
+        .btn-lock.locked { opacity: 1; filter: drop-shadow(0 0 5px var(--primary)); }
+        .controls.locked { pointer-events: none; opacity: 0.4; }
+        .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .collapsible-card { margin-top: 15px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
         .collapsible-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
-        .collapsible-content { display: none; padding: 15px; font-size: 0.9rem; line-height: 1.5; border-top: 1px solid #88888833; }
-        
-        .graph-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px 0; gap: 5px; }
-        .graph-bar { background: var(--primary); width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
-
-        .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .attribution { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-align: center; display: block; color: var(--text); text-decoration: none; }
+        .collapsible-content { display: none; padding: 15px; font-size: 0.9rem; border-top: 1px solid #88888833; }
     </style>
-
-    <link rel="manifest" href="manifest.json?v=9">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2196F3">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body class="dark-mode">
 
@@ -82,38 +60,37 @@
     <button class="btn-reset" onclick="resetAll()">Reset All Values</button>
 
     <div class="collapsible-card">
-        <div class="collapsible-header" onclick="toggleCollapse('graph-content', 'graph-arrow')">
-            <span>7-Day Productivity Graph</span>
-            <span id="graph-arrow">▼</span>
-        </div>
-        <div class="collapsible-content" id="graph-content">
-            <div class="graph-container" id="daily-graph"></div>
-        </div>
-    </div>
-
-    <div class="collapsible-card">
-        <div class="collapsible-header" onclick="toggleCollapse('guide-content', 'guide-arrow')">
-            <span>How to install as app</span>
+        <div class="collapsible-header" onclick="toggleSection('guide-content', 'guide-arrow')">
+            <span>How to install this as an app</span>
             <span id="guide-arrow">▼</span>
         </div>
-        <div class="collapsible-content" id="guide-content">
-            <p>Android: <b>⋮ > Add to Home screen</b><br>iPhone: <b>Share > Add to Home Screen</b></p>
+        <div id="guide-content" class="collapsible-content">
+            <h4>Android (Chrome/Firefox)</h4>
+            <ol>
+                <li>Tap the <b>three dots (⋮)</b>.</li>
+                <li>Select <b>"Install app"</b> or <b>"Add to Home screen"</b>.</li>
+            </ol>
+            <h4>iPhone (Safari)</h4>
+            <ol>
+                <li>Tap the <b>Share icon</b>.</li>
+                <li>Tap <b>"Add to Home Screen"</b>.</li>
+            </ol>
         </div>
     </div>
 
     <div class="collapsible-card">
-        <div class="collapsible-header" onclick="toggleCollapse('backup-content', 'backup-arrow')">
-            <span>Backup and Restore</span>
+        <div class="collapsible-header" onclick="toggleSection('backup-content', 'backup-arrow')">
+            <span>Backup & Restore Data</span>
             <span id="backup-arrow">▼</span>
         </div>
-        <div class="collapsible-content" id="backup-content">
-            <button onclick="exportData()" style="padding:10px; background:var(--primary); color:white; width:100%; margin-bottom:5px;">💾 Backup</button>
-            <button onclick="document.getElementById('importFile').click()" style="padding:10px; background:var(--accent); color:white; width:100%;">📂 Import</button>
+        <div id="backup-content" class="collapsible-content">
+            <button onclick="exportData()" style="width:100%; padding:10px; margin-bottom:5px; background:var(--primary); color:white; border-radius:8px;">💾 Backup to File</button>
+            <button onclick="document.getElementById('importFile').click()" style="width:100%; padding:10px; background:var(--accent); color:white; border-radius:8px;">📂 Import from File</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
         </div>
     </div>
 
-    <a href="https://www.flaticon.com/free-icons/crochet" class="attribution">Crochet icons created by PIXARTIST - Flaticon</a>
+    <a href="https://www.flaticon.com/free-icons/crochet" style="margin-top: 20px; font-size: 0.7rem; opacity: 0.6; text-decoration: none; color: var(--text);">Crochet icons created by PIXARTIST - Flaticon</a>
 </div>
 
 <script>
@@ -134,33 +111,54 @@
         save();
     }
 
+    function toggleSection(contentId, arrowId) {
+        const content = document.getElementById(contentId);
+        const arrow = document.getElementById(arrowId);
+        const isOpen = content.style.display === "block";
+        content.style.display = isOpen ? "none" : "block";
+        arrow.innerText = isOpen ? "▼" : "▲";
+    }
+
     function addCounter() {
         const name = prompt("What are you tracking?", "Project Name");
-        const goal = parseInt(prompt("What is your target amount of rows? (Number)", "10"));
+        const goal = parseInt(prompt("What is your target amount of rows?", "10"));
         if (name && !isNaN(goal)) {
             counters.push({ 
                 name: name, 
                 count: 0, 
                 goal: goal, 
                 lastUpdated: 'Never',
-                locked: false
+                locked: false,
+                subCounters: [] 
             });
             save();
         }
     }
 
+    function addSubCounter(index) {
+        const subName = prompt("Part Name? (e.g. Sleeve)");
+        if (subName) {
+            if (!counters[index].subCounters) counters[index].subCounters = [];
+            counters[index].subCounters.push({ name: subName, count: 0 });
+            save();
+        }
+    }
+
+    function updateSub(cIdx, sIdx, delta) {
+        counters[cIdx].subCounters[sIdx].count = Math.max(0, counters[cIdx].subCounters[sIdx].count + delta);
+        save();
+    }
+
     function updateCount(index, delta) {
-        if (counters[index].locked) return; // Prevent updates if locked
+        if (counters[index].locked) return;
         counters[index].count = Math.max(0, counters[index].count + delta);
         counters[index].lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         save();
     }
 
-    function resetAll() {
-        if(confirm("Clear all progress?")) {
-            counters.forEach(c => { c.count = 0; c.lastUpdated = 'Reset just now'; });
-            save();
-        }
+    function toggleLock(index) {
+        counters[index].locked = !counters[index].locked;
+        save();
     }
 
     function deleteCounter(index) {
@@ -170,9 +168,40 @@
         }
     }
 
-    function toggleLock(index) {
-        counters[index].locked = !counters[index].locked;
-        save();
+    function resetAll() {
+        if(confirm("Clear all progress?")) {
+            counters.forEach(c => { 
+                c.count = 0; 
+                c.lastUpdated = 'Reset'; 
+                if(c.subCounters) c.subCounters.forEach(s => s.count = 0);
+            });
+            save();
+        }
+    }
+
+    function exportData() {
+        const blob = new Blob([JSON.stringify(counters, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `crochet-backup.json`;
+        link.click();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported)) {
+                    counters = imported;
+                    save();
+                }
+            } catch (err) { alert("Invalid backup file."); }
+        };
+        reader.readAsText(file);
     }
 
     function render() {
@@ -195,11 +224,29 @@
                             <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
                         </div>
                     </div>
+
+                    ${c.subCounters && c.subCounters.length > 0 ? `
+                        <div class="sub-counters">
+                            ${c.subCounters.map((s, si) => `
+                                <div class="sub-item">
+                                    <span>${s.name}: <b>${s.count}</b></span>
+                                    <div>
+                                        <button class="sub-btn" onclick="updateSub(${i},${si},-1)">-</button>
+                                        <button class="sub-btn" onclick="updateSub(${i},${si},1)">+</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
                     <div class="controls ${lockClass}">
                         <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
                         <span class="count-display">${c.count}</span>
                         <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
                     </div>
+
+                    <button onclick="addSubCounter(${i})" style="width:100%; background:rgba(0,0,0,0.05); color:var(--text); padding:8px; font-size:0.75rem; border-radius:8px; margin-bottom:10px;">+ Add Part (Sleeve, etc.)</button>
+
                     <div class="progress-container">
                         <div class="progress-bar" style="width: ${progress}%"></div>
                     </div>
@@ -209,22 +256,8 @@
         });
     }
 
-    // Initial render
     render();
-
-    // Toggle Function for the Guide
-    function toggleGuide() {
-        const content = document.getElementById('guide-content');
-        const arrow = document.getElementById('guide-arrow');
-        if (content.style.display === "block") {
-            content.style.display = "none";
-            arrow.innerText = "▼";
-        } else {
-            content.style.display = "block";
-            arrow.innerText = "▲";
-        }
-    }
 </script>
-
 </body>
 </html>
+ 
