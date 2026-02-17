@@ -10,7 +10,7 @@
         body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #bb86fc; --accent: #03dac6; --border: rgba(255,255,255,0.1); }
         
         body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; margin: 0; }
-        .container { width: 100%; max-width: 450px; }
+        .container { width: 100%; max-width: 450px; padding-bottom: 40px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; }
         
         .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; border: 2px solid transparent; }
@@ -70,6 +70,15 @@
         .collapsible-card { margin-top: 15px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
         .collapsible-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
         .collapsible-content { display: none; padding: 15px; font-size: 0.9rem; border-top: 1px solid #88888833; }
+
+        .footer { text-align: center; margin-top: 40px; padding-bottom: 20px; }
+        .ig-link { 
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--primary); font-weight: bold; 
+            text-decoration: none; font-size: 1.1rem; margin-bottom: 8px; 
+        }
+        .ig-link svg { width: 20px; height: 20px; fill: currentColor; }
+        .attribution { font-size: 0.75rem; opacity: 0.5; color: var(--text); }
     </style>
 </head>
 <body class="dark-mode">
@@ -106,6 +115,14 @@
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
         </div>
     </div>
+
+    <div class="footer">
+        <a href="https://www.instagram.com/EnzemoCrochet" target="_blank" class="ig-link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            @EnzemoCrochet
+        </a>
+        <div class="attribution">Developed with Gemini AI</div>
+    </div>
 </div>
 
 <script>
@@ -139,18 +156,10 @@
         const goal = parseInt(prompt("What is your target amount of rows?", "100"));
         if (name && !isNaN(goal)) {
             counters.push({ 
-                name: name, 
-                count: 0, 
-                goal: goal, 
-                lastUpdated: 'Never',
-                locked: false,
-                showTimer: false,
-                pinned: false,
-                startTime: null,
-                sessionStartCount: 0,
-                celebrated: false,
-                notes: "",
-                dailyLog: {}
+                name: name, count: 0, goal: goal, lastUpdated: 'Never',
+                locked: false, showTimer: false, pinned: false,
+                startTime: null, sessionStartCount: 0, celebrated: false,
+                notes: "", dailyLog: {}
             });
             save();
         }
@@ -170,12 +179,10 @@
     function updateCount(index, delta) {
         const c = counters[index];
         if (c.locked) return;
-
         if (delta > 0 && !c.startTime) {
             c.startTime = Date.now();
             c.sessionStartCount = c.count;
         }
-
         c.count = Math.max(0, c.count + delta);
         c.lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -184,14 +191,28 @@
             if (!c.dailyLog) c.dailyLog = {};
             c.dailyLog[today] = (c.dailyLog[today] || 0) + delta;
         }
-
         if (c.count >= c.goal && !c.celebrated) {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             c.celebrated = true;
         }
         if (c.count < c.goal) c.celebrated = false;
-
         save();
+    }
+
+    function shareProgress(index) {
+        const c = counters[index];
+        const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
+        const text = `🧶 Project Update: ${c.name}\n📍 Progress: ${c.count} / ${c.goal} rows (${progress}%)\n✨ Made with @EnzemoCrochet Counter`;
+        
+        if (navigator.share) {
+            navigator.share({ title: 'My Crochet Progress', text: text }).catch(() => copyToClipboard(text));
+        } else {
+            copyToClipboard(text);
+        }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => alert("Progress summary copied! Paste it into your Instagram Story."));
     }
 
     function toggleUtility(index, property) {
@@ -241,13 +262,11 @@
         const list = document.getElementById('counter-list');
         list.innerHTML = '';
         
-        // Sorting Logic: Pinned items first
-        const sortedCounters = counters
-            .map((item, index) => ({ ...item, originalIndex: index }))
-            .sort((a, b) => (b.pinned - a.pinned));
+        const sortedIndices = counters.map((_, index) => index)
+            .sort((a, b) => (counters[b].pinned - counters[a].pinned));
 
-        sortedCounters.forEach((c) => {
-            const i = c.originalIndex;
+        sortedIndices.forEach((i) => {
+            const c = counters[i];
             const isDone = c.count >= c.goal;
             const progress = Math.min(100, (c.count / (c.goal || 1)) * 100);
             
@@ -282,6 +301,7 @@
                             <div class="history-info">Last update: ${c.lastUpdated}</div>
                         </div>
                         <div>
+                            <button class="btn-utility" onclick="shareProgress(${i})">📤</button>
                             <button class="btn-utility ${c.pinned ? 'active' : ''}" onclick="toggleUtility(${i}, 'pinned')">📌</button>
                             <button class="btn-utility ${c.showTimer ? 'active' : ''}" onclick="toggleUtility(${i}, 'showTimer')">⏱️</button>
                             <button class="btn-utility ${c.locked ? 'active' : ''}" onclick="toggleUtility(${i}, 'locked')">${c.locked ? '🔒' : '🔓'}</button>
