@@ -9,7 +9,6 @@ https://enzemo.github.io/CrochetCounter/
 
 A sleek, mobile-first web application designed for crocheters and knitters to track their project progress with precision. This tool focuses on simplicity, speed tracking, and easy social sharing.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.2.0-accent)
 
 ## ✨ Features
