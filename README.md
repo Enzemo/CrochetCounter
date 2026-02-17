@@ -27,7 +27,7 @@ A sleek, mobile-first web application designed for crocheters and knitters to tr
 
 ## 🚀 How to Use
 
-1.  Open the `index.html` file in any modern web browser.
+1.  Open the `index.html` file in any modern web browser or visit https://enzemo.github.io/CrochetCounter/
 2.  **To Install on Mobile:**
     * **iOS:** Tap the 'Share' icon and select 'Add to Home Screen'.
     * **Android:** Tap the three dots (⋮) and select 'Install App' or 'Add to Home screen'.
