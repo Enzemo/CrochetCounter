@@ -61,8 +61,14 @@
         .btn-reset { background: transparent; border: 1px solid #888; color: #888; width: 100%; padding: 10px; margin-top: 20px; }
         .btn-del { background: transparent; color: #ff5252; padding: 5px; font-size: 1.1rem; }
         
-        .btn-utility { background: transparent; font-size: 1.2rem; padding: 5px; opacity: 0.4; margin-right: 5px; }
+        .btn-utility { 
+            background: transparent; padding: 5px; opacity: 0.4; margin-right: 5px; 
+            display: inline-flex; align-items: center; justify-content: center;
+            vertical-align: middle;
+        }
+        .btn-utility svg { width: 20px; height: 20px; fill: var(--text); }
         .btn-utility.active { opacity: 1; filter: drop-shadow(0 0 5px var(--primary)); }
+        .btn-utility.active svg { fill: var(--primary); }
         
         .controls.locked { pointer-events: none; opacity: 0.4; }
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -187,8 +193,6 @@
     function updateCount(index, delta) {
         const c = counters[index];
         if (c.locked) return;
-        
-        // Block subtraction if total count is already 0
         if (delta < 0 && c.count <= 0) return;
 
         if (delta > 0 && !c.startTime) {
@@ -199,14 +203,10 @@
         c.count = Math.max(0, c.count + delta);
         c.lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        // Update Daily History (Fixed to allow decrements)
         const today = new Date().toISOString().split('T')[0];
         if (!c.dailyLog) c.dailyLog = {};
-        
         let todayVal = (c.dailyLog[today] || 0) + delta;
         c.dailyLog[today] = Math.max(0, todayVal);
-        
-        // Clean up log if today's net progress is 0
         if (c.dailyLog[today] === 0) delete c.dailyLog[today];
 
         if (c.count >= c.goal && !c.celebrated) {
@@ -217,25 +217,20 @@
         save();
     }
 
-        function shareProgress(index) {
+    function shareProgress(index) {
         const c = counters[index];
         const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
         
         let shareText = `🧶 Project Update: ${c.name}\n📍 Total: ${c.count} / ${c.goal} rows (${progress}%)`;
         
-        // --- UPDATED HISTORY SHARING LOGIC ---
         if (c.dailyLog && Object.keys(c.dailyLog).length > 0) {
-            // Sort dates descending (newest first)
             const sortedDates = Object.keys(c.dailyLog).sort().reverse();
-            // Take the top 3
             const recentDays = sortedDates.slice(0, 3);
-            
             shareText += `\n\n📊 Recent Activity:`;
             recentDays.forEach(date => {
                 shareText += `\n- ${date}: +${c.dailyLog[date]} rows`;
             });
         }
-        // -------------------------------------
         
         if (navigator.share) {
             navigator.share({ title: 'My Crochet Progress', text: shareText }).catch(() => copyToClipboard(shareText));
@@ -243,7 +238,6 @@
             copyToClipboard(shareText);
         }
     }
-
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => alert("Progress summary copied!"));
@@ -295,18 +289,14 @@
     function render() {
         const list = document.getElementById('counter-list');
         list.innerHTML = '';
-        
-        const sortedIndices = counters.map((_, index) => index)
-            .sort((a, b) => (counters[b].pinned - counters[a].pinned));
+        const sortedIndices = counters.map((_, index) => index).sort((a, b) => (counters[b].pinned - counters[a].pinned));
 
         sortedIndices.forEach((i) => {
             const c = counters[i];
             const isDone = c.count >= c.goal;
             const progress = Math.min(100, (c.count / (c.goal || 1)) * 100);
-            
             let rpm = "0.0", rph = "0.0", estFinish = "Awaiting data...";
             
-            // Only calculate timer math if the timer is actually displayed
             if (c.showTimer && c.startTime) {
                 const sessionRows = c.count - c.sessionStartCount;
                 const elapsedMins = (Date.now() - c.startTime) / 60000;
@@ -337,10 +327,18 @@
                             <div class="history-info">Last update: ${c.lastUpdated}</div>
                         </div>
                         <div>
-                            <button class="btn-utility" onclick="shareProgress(${i})">📤</button>
-                            <button class="btn-utility ${c.pinned ? 'active' : ''}" onclick="toggleUtility(${i}, 'pinned')">📌</button>
-                            <button class="btn-utility ${c.showTimer ? 'active' : ''}" onclick="toggleUtility(${i}, 'showTimer')">⏱️</button>
-                            <button class="btn-utility ${c.locked ? 'active' : ''}" onclick="toggleUtility(${i}, 'locked')">${c.locked ? '🔒' : '🔓'}</button>
+                            <button class="btn-utility" onclick="shareProgress(${i})">
+                                <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                            </button>
+                            <button class="btn-utility ${c.pinned ? 'active' : ''}" onclick="toggleUtility(${i}, 'pinned')">
+                                <svg viewBox="0 0 24 24"><path d="M16 9V4l1 0V2H7v2l1 0v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>
+                            </button>
+                            <button class="btn-utility ${c.showTimer ? 'active' : ''}" onclick="toggleUtility(${i}, 'showTimer')">
+                                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                            </button>
+                            <button class="btn-utility ${c.locked ? 'active' : ''}" onclick="toggleUtility(${i}, 'locked')">
+                                <svg viewBox="0 0 24 24"><path d="${c.locked ? 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z' : 'M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z'}"/></svg>
+                            </button>
                             <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
                         </div>
                     </div>
@@ -364,20 +362,18 @@
 
                     ${logHtml ? `<div class="stats-log">${logHtml}</div>` : ''}
 
-                    <textarea class="notes-area" placeholder="Notes (hook, yarn...)" 
-                        oninput="updateNotes(${i}, this.value)">${c.notes || ''}</textarea>
+                    <textarea class="notes-area" placeholder="Notes (hook, yarn...)" oninput="updateNotes(${i}, this.value)">${c.notes || ''}</textarea>
                 </div>
             `;
         });
     }
 
-    // Optimization: Only interval-refresh if there is an active session AND timer is visible
     setInterval(() => {
-        const needsUpdate = counters.some(c => c.startTime && c.showTimer);
-        if (needsUpdate) render();
+        if (counters.some(c => c.startTime && c.showTimer)) render();
     }, 30000);
 
     render();
 </script>
 </body>
 </html>
+ 
