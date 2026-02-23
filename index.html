@@ -34,7 +34,9 @@
         }
 
         .controls { display: flex; align-items: center; justify-content: space-around; margin-bottom: 15px; }
-        .count-display { font-size: 3rem; font-weight: 800; color: var(--primary); }
+        .count-display { font-size: 3rem; font-weight: 800; color: var(--primary); cursor: pointer; padding: 10px; border-radius: 8px; }
+        .count-display:hover { background: rgba(0,0,0,0.05); }
+        body.dark-mode .count-display:hover { background: rgba(255,255,255,0.05); }
         
         .progress-container { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: var(--accent); height: 100%; transition: width 0.4s ease; width: 0%; }
@@ -54,7 +56,7 @@
         }
 
         button { border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-circle { width: 60px; height: 60px; font-size: 1.8rem; color: white; }
+        .btn-circle { width: 60px; height: 60px; font-size: 1.8rem; color: white; display: flex; align-items: center; justify-content: center; }
         .btn-add { background: var(--accent); }
         .btn-sub { background: #f44336; }
         .btn-new { background: var(--primary); color: white; width: 100%; padding: 15px; margin-bottom: 10px; font-size: 1rem; }
@@ -73,17 +75,26 @@
         .controls.locked { pointer-events: none; opacity: 0.4; }
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
+        /* Fullscreen Overlay Style */
+        #focus-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .focus-count { font-size: 8rem; font-weight: 900; color: var(--primary); margin: 40px 0; }
+        .focus-controls { display: flex; gap: 40px; align-items: center; }
+        .btn-giant { width: 100px; height: 100px; font-size: 3rem; border-radius: 50%; }
+        .focus-header { position: absolute; top: 20px; text-align: center; width: 100%; }
+        .focus-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; }
+        .btn-back { background: var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; }
+
         .collapsible-card { margin-top: 15px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
         .collapsible-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
         .collapsible-content { display: none; padding: 15px; font-size: 0.9rem; border-top: 1px solid #88888833; }
 
         .footer { text-align: center; margin-top: 40px; padding-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .external-links { display: flex; gap: 20px; justify-content: center; align-items: center; }
-        .ext-link { 
-            display: inline-flex; align-items: center; gap: 6px;
-            color: var(--primary); font-weight: bold; 
-            text-decoration: none; font-size: 1rem;
-        }
+        .ext-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1rem; }
         .ext-link svg { width: 18px; height: 18px; fill: currentColor; }
         .attribution { font-size: 0.75rem; opacity: 0.5; color: var(--text); margin-top: 5px; }
         .attribution a { color: inherit; text-decoration: underline; }
@@ -91,7 +102,19 @@
 </head>
 <body class="dark-mode">
 
-<div class="container">
+<div id="focus-overlay">
+    <div class="focus-header">
+        <div id="focus-title" class="focus-title">Project Name</div>
+        <button class="btn-back" onclick="closeFocus()">← Back to Overview</button>
+    </div>
+    <div class="focus-count" id="focus-count">0</div>
+    <div class="focus-controls">
+        <button class="btn-circle btn-giant btn-sub" onclick="updateFocusCount(-1)">−</button>
+        <button class="btn-circle btn-giant btn-add" onclick="updateFocusCount(1)">+</button>
+    </div>
+</div>
+
+<div class="container" id="main-ui">
     <div class="header">
         <h1>Crochet Counter</h1>
         <button class="mode-toggle" onclick="toggleDarkMode()">🌓</button>
@@ -142,6 +165,7 @@
 <script>
     let counters = JSON.parse(localStorage.getItem('goalCounters')) || [];
     let isDark = localStorage.getItem('darkMode') !== 'false';
+    let currentFocusIndex = null;
 
     if (!isDark) document.body.classList.remove('dark-mode');
 
@@ -176,6 +200,29 @@
                 notes: "", dailyLog: {}
             });
             save();
+        }
+    }
+
+    function openFocus(index) {
+        currentFocusIndex = index;
+        const c = counters[index];
+        document.getElementById('focus-title').innerText = c.name;
+        document.getElementById('focus-count').innerText = c.count;
+        document.getElementById('focus-overlay').style.display = 'flex';
+        document.getElementById('main-ui').style.display = 'none';
+    }
+
+    function closeFocus() {
+        currentFocusIndex = null;
+        document.getElementById('focus-overlay').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+        render();
+    }
+
+    function updateFocusCount(delta) {
+        if (currentFocusIndex !== null) {
+            updateCount(currentFocusIndex, delta);
+            document.getElementById('focus-count').innerText = counters[currentFocusIndex].count;
         }
     }
 
@@ -214,52 +261,34 @@
             c.celebrated = true;
         }
         if (c.count < c.goal) c.celebrated = false;
-        save();
+        save(currentFocusIndex === null); // Only re-render if not in focus mode
     }
 
     function shareProgress(index) {
         const c = counters[index];
         const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
-        
         let shareText = `🧶 Project Update: ${c.name}\n📍 Total: ${c.count} / ${c.goal} rows (${progress}%)`;
-        
         if (c.dailyLog && Object.keys(c.dailyLog).length > 0) {
             const sortedDates = Object.keys(c.dailyLog).sort().reverse();
             const recentDays = sortedDates.slice(0, 3);
             shareText += `\n\n📊 Recent Activity:`;
-            recentDays.forEach(date => {
-                shareText += `\n- ${date}: +${c.dailyLog[date]} rows`;
-            });
+            recentDays.forEach(date => { shareText += `\n- ${date}: +${c.dailyLog[date]} rows`; });
         }
-        
-        if (navigator.share) {
-            navigator.share({ title: 'My Crochet Progress', text: shareText }).catch(() => copyToClipboard(shareText));
-        } else {
-            copyToClipboard(shareText);
-        }
+        if (navigator.share) { navigator.share({ title: 'My Crochet Progress', text: shareText }).catch(() => copyToClipboard(shareText)); } else { copyToClipboard(shareText); }
     }
 
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => alert("Progress summary copied!"));
-    }
+    function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert("Progress summary copied!")); }
 
     function toggleUtility(index, property) {
         counters[index][property] = !counters[index][property];
         save();
     }
 
-    function deleteCounter(index) {
-        if(confirm("Delete this project?")) {
-            counters.splice(index, 1);
-            save();
-        }
-    }
+    function deleteCounter(index) { if(confirm("Delete this project?")) { counters.splice(index, 1); save(); } }
 
     function resetAll() {
         if(confirm("Clear all progress?")) {
-            counters.forEach(c => { 
-                c.count = 0; c.lastUpdated = 'Reset'; c.startTime = null; c.celebrated = false; c.dailyLog = {};
-            });
+            counters.forEach(c => { c.count = 0; c.lastUpdated = 'Reset'; c.startTime = null; c.celebrated = false; c.dailyLog = {}; });
             save();
         }
     }
@@ -268,21 +297,14 @@
         const blob = new Blob([JSON.stringify(counters, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = url;
-        link.download = `crochet-backup.json`;
-        link.click();
+        link.href = url; link.download = `crochet-backup.json`; link.click();
     }
 
     function importData(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                counters = JSON.parse(e.target.result);
-                save();
-            } catch (err) { alert("Invalid file."); }
-        };
+        reader.onload = function(e) { try { counters = JSON.parse(e.target.result); save(); } catch (err) { alert("Invalid file."); } };
         reader.readAsText(file);
     }
 
@@ -302,8 +324,7 @@
                 const elapsedMins = (Date.now() - c.startTime) / 60000;
                 if (sessionRows > 0 && elapsedMins > 0) {
                     const rowsPerMin = sessionRows / elapsedMins;
-                    rpm = rowsPerMin.toFixed(1);
-                    rph = (rowsPerMin * 60).toFixed(1);
+                    rpm = rowsPerMin.toFixed(1); rph = (rowsPerMin * 60).toFixed(1);
                     const rowsLeft = c.goal - c.count;
                     if (rowsLeft > 0) {
                         const minsLeft = rowsLeft / rowsPerMin;
@@ -351,7 +372,7 @@
 
                     <div class="controls ${c.locked ? 'locked' : ''}">
                         <button class="btn-circle btn-sub" onclick="updateCount(${i}, -1)">−</button>
-                        <span class="count-display">${c.count}</span>
+                        <span class="count-display" onclick="openFocus(${i})">${c.count}</span>
                         <button class="btn-circle btn-add" onclick="updateCount(${i}, 1)">+</button>
                     </div>
 
@@ -368,12 +389,8 @@
         });
     }
 
-    setInterval(() => {
-        if (counters.some(c => c.startTime && c.showTimer)) render();
-    }, 30000);
-
+    setInterval(() => { if (counters.some(c => c.startTime && c.showTimer)) render(); }, 30000);
     render();
 </script>
 </body>
 </html>
- 
