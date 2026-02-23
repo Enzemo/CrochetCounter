@@ -217,17 +217,33 @@
         save();
     }
 
-    function shareProgress(index) {
+        function shareProgress(index) {
         const c = counters[index];
         const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
-        const text = `🧶 Project Update: ${c.name}\n📍 Progress: ${c.count} / ${c.goal} rows (${progress}%)`;
+        
+        let shareText = `🧶 Project Update: ${c.name}\n📍 Total: ${c.count} / ${c.goal} rows (${progress}%)`;
+        
+        // --- UPDATED HISTORY SHARING LOGIC ---
+        if (c.dailyLog && Object.keys(c.dailyLog).length > 0) {
+            // Sort dates descending (newest first)
+            const sortedDates = Object.keys(c.dailyLog).sort().reverse();
+            // Take the top 3
+            const recentDays = sortedDates.slice(0, 3);
+            
+            shareText += `\n\n📊 Recent Activity:`;
+            recentDays.forEach(date => {
+                shareText += `\n- ${date}: +${c.dailyLog[date]} rows`;
+            });
+        }
+        // -------------------------------------
         
         if (navigator.share) {
-            navigator.share({ title: 'My Crochet Progress', text: text }).catch(() => copyToClipboard(text));
+            navigator.share({ title: 'My Crochet Progress', text: shareText }).catch(() => copyToClipboard(shareText));
         } else {
-            copyToClipboard(text);
+            copyToClipboard(shareText);
         }
     }
+
 
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => alert("Progress summary copied!"));
