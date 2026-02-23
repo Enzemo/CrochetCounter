@@ -81,12 +81,15 @@
             background: var(--bg); display: none; flex-direction: column;
             align-items: center; justify-content: center; z-index: 1000;
         }
-        .focus-count { font-size: 8rem; font-weight: 900; color: var(--primary); margin: 40px 0; }
-        .focus-controls { display: flex; gap: 40px; align-items: center; }
-        .btn-giant { width: 100px; height: 100px; font-size: 3rem; border-radius: 50%; }
-        .focus-header { position: absolute; top: 20px; text-align: center; width: 100%; }
-        .focus-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; }
+        .focus-count { font-size: 9rem; font-weight: 900; color: var(--primary); margin: 20px 0; line-height: 1; }
+        .focus-controls { display: flex; flex-direction: column; align-items: center; gap: 30px; }
+        .btn-giant { width: 140px; height: 140px; font-size: 4rem; border-radius: 30px; }
+        .focus-header { position: absolute; top: 20px; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .focus-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; padding: 0 20px; text-align: center; }
+        .focus-actions { display: flex; gap: 15px; }
         .btn-back { background: var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; }
+        .btn-flip { background: var(--primary); color: white; padding: 10px 15px; border-radius: 8px; display: flex; align-items: center; gap: 5px; }
+        .btn-flip svg { width: 18px; height: 18px; fill: currentColor; }
 
         .collapsible-card { margin-top: 15px; width: 100%; border: 1px solid #88888855; border-radius: 12px; overflow: hidden; background: var(--card); }
         .collapsible-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
@@ -105,12 +108,19 @@
 <div id="focus-overlay">
     <div class="focus-header">
         <div id="focus-title" class="focus-title">Project Name</div>
-        <button class="btn-back" onclick="closeFocus()">← Back to Overview</button>
+        <div class="focus-actions">
+            <button class="btn-back" onclick="closeFocus()">← Back</button>
+            <button class="btn-flip" onclick="flipFocusControls()">
+                <svg viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>
+                Flip
+            </button>
+        </div>
     </div>
-    <div class="focus-count" id="focus-count">0</div>
-    <div class="focus-controls">
-        <button class="btn-circle btn-giant btn-sub" onclick="updateFocusCount(-1)">−</button>
-        <button class="btn-circle btn-giant btn-add" onclick="updateFocusCount(1)">+</button>
+    
+    <div class="focus-controls" id="focus-control-container">
+        <button id="focus-sub" class="btn-circle btn-giant btn-sub" onclick="updateFocusCount(-1)">−</button>
+        <div class="focus-count" id="focus-count">0</div>
+        <button id="focus-add" class="btn-circle btn-giant btn-add" onclick="updateFocusCount(1)">+</button>
     </div>
 </div>
 
@@ -150,7 +160,7 @@
     <div class="footer">
         <div class="external-links">
             <a href="https://www.instagram.com/EnzemoCrochet" target="_blank" class="ext-link">
-                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0-3.668-.014-4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 Instagram
             </a>
             <a href="https://github.com/Enzemo/CrochetCounter/" target="_blank" class="ext-link">
@@ -166,6 +176,7 @@
     let counters = JSON.parse(localStorage.getItem('goalCounters')) || [];
     let isDark = localStorage.getItem('darkMode') !== 'false';
     let currentFocusIndex = null;
+    let focusFlipped = false;
 
     if (!isDark) document.body.classList.remove('dark-mode');
 
@@ -219,22 +230,32 @@
         render();
     }
 
+    function flipFocusControls() {
+        focusFlipped = !focusFlipped;
+        const container = document.getElementById('focus-control-container');
+        const subBtn = document.getElementById('focus-sub');
+        const countDisplay = document.getElementById('focus-count');
+        const addBtn = document.getElementById('focus-add');
+
+        container.innerHTML = '';
+        if (focusFlipped) {
+            // Flip: + on top, - on bottom
+            container.appendChild(addBtn);
+            container.appendChild(countDisplay);
+            container.appendChild(subBtn);
+        } else {
+            // Standard: - on top, + on bottom
+            container.appendChild(subBtn);
+            container.appendChild(countDisplay);
+            container.appendChild(addBtn);
+        }
+    }
+
     function updateFocusCount(delta) {
         if (currentFocusIndex !== null) {
             updateCount(currentFocusIndex, delta);
             document.getElementById('focus-count').innerText = counters[currentFocusIndex].count;
         }
-    }
-
-    function resetSession(index) {
-        counters[index].startTime = null;
-        counters[index].sessionStartCount = counters[index].count;
-        save();
-    }
-
-    function updateNotes(index, text) {
-        counters[index].notes = text;
-        save(false); 
     }
 
     function updateCount(index, delta) {
@@ -261,7 +282,18 @@
             c.celebrated = true;
         }
         if (c.count < c.goal) c.celebrated = false;
-        save(currentFocusIndex === null); // Only re-render if not in focus mode
+        save(currentFocusIndex === null);
+    }
+
+    function resetSession(index) {
+        counters[index].startTime = null;
+        counters[index].sessionStartCount = counters[index].count;
+        save();
+    }
+
+    function updateNotes(index, text) {
+        counters[index].notes = text;
+        save(false); 
     }
 
     function shareProgress(index) {
