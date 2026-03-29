@@ -11,10 +11,12 @@
         
         body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; margin: 0; }
         .container { width: 100%; max-width: 450px; padding-bottom: 40px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%; }
         
+        .search-box { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 20px; box-sizing: border-box; }
+
         .counter-card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; position: relative; border: 2px solid transparent; }
-        .counter-card.completed { border-color: var(--accent); }
+        .counter-card.completed-status { border-color: var(--accent); opacity: 0.9; }
         .counter-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
         .counter-name { font-size: 1.2rem; font-weight: bold; }
         .history-info { font-size: 0.75rem; color: #888; margin-bottom: 15px; }
@@ -75,7 +77,6 @@
         .controls.locked { pointer-events: none; opacity: 0.4; }
         .mode-toggle { background: var(--card); color: var(--text); padding: 8px; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* Fullscreen Overlay Style */
         #focus-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); display: none; flex-direction: column;
@@ -95,12 +96,12 @@
         .collapsible-header { background: rgba(0,0,0,0.05); padding: 12px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
         .collapsible-content { display: none; padding: 15px; font-size: 0.9rem; border-top: 1px solid #88888833; }
 
+        .section-divider { margin: 40px 0 20px; border-top: 2px solid var(--border); padding-top: 20px; opacity: 0.7; font-size: 1.4rem; font-weight: bold; text-align: center; }
+
         .footer { text-align: center; margin-top: 40px; padding-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .external-links { display: flex; gap: 20px; justify-content: center; align-items: center; }
         .ext-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1rem; }
         .ext-link svg { width: 18px; height: 18px; fill: currentColor; }
-        .attribution { font-size: 0.75rem; opacity: 0.5; color: var(--text); margin-top: 5px; }
-        .attribution a { color: inherit; text-decoration: underline; }
     </style>
 </head>
 <body class="dark-mode">
@@ -129,8 +130,14 @@
         <h1>Crochet Counter</h1>
         <button class="mode-toggle" onclick="toggleDarkMode()">🌓</button>
     </div>
+
+    <input type="text" id="projectSearch" class="search-box" placeholder="Search projects..." oninput="render()">
     
-    <div id="counter-list"></div>
+    <div id="active-list"></div>
+    <div id="completed-section" style="display:none">
+        <div class="section-divider">Completed Projects</div>
+        <div id="completed-list"></div>
+    </div>
     
     <button class="btn-new" onclick="addCounter()">+ Create New Project</button>
     <button class="btn-reset" onclick="resetAll()">Reset All Values</button>
@@ -168,7 +175,6 @@
                 GitHub
             </a>
         </div>
-        <div class="attribution">Confetti effects by <a href="https://github.com/catdad/canvas-confetti" target="_blank">canvas-confetti</a></div>
     </div>
 </div>
 
@@ -206,12 +212,22 @@
         if (name && !isNaN(goal)) {
             counters.push({ 
                 name: name, count: 0, goal: goal, lastUpdated: 'Never',
-                locked: false, showTimer: false, pinned: false,
+                locked: false, showTimer: false, pinned: false, status: 'active',
                 startTime: null, sessionStartCount: 0, celebrated: false,
                 notes: "", dailyLog: {}
             });
             save();
         }
+    }
+
+    function toggleComplete(index) {
+        const c = counters[index];
+        c.status = (c.status === 'completed') ? 'active' : 'completed';
+        if (c.status === 'completed') {
+            c.pinned = false;
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.7 } });
+        }
+        save();
     }
 
     function openFocus(index) {
@@ -239,12 +255,10 @@
 
         container.innerHTML = '';
         if (focusFlipped) {
-            // Flip: + on top, - on bottom
             container.appendChild(addBtn);
             container.appendChild(countDisplay);
             container.appendChild(subBtn);
         } else {
-            // Standard: - on top, + on bottom
             container.appendChild(subBtn);
             container.appendChild(countDisplay);
             container.appendChild(addBtn);
@@ -320,7 +334,7 @@
 
     function resetAll() {
         if(confirm("Clear all progress?")) {
-            counters.forEach(c => { c.count = 0; c.lastUpdated = 'Reset'; c.startTime = null; c.celebrated = false; c.dailyLog = {}; });
+            counters.forEach(c => { c.count = 0; c.lastUpdated = 'Reset'; c.startTime = null; c.celebrated = false; c.dailyLog = {}; c.status = 'active'; });
             save();
         }
     }
@@ -341,12 +355,23 @@
     }
 
     function render() {
-        const list = document.getElementById('counter-list');
-        list.innerHTML = '';
-        const sortedIndices = counters.map((_, index) => index).sort((a, b) => (counters[b].pinned - counters[a].pinned));
+        const activeList = document.getElementById('active-list');
+        const completedList = document.getElementById('completed-list');
+        const compSection = document.getElementById('completed-section');
+        const searchTerm = document.getElementById('projectSearch').value.toLowerCase();
+        
+        activeList.innerHTML = '';
+        completedList.innerHTML = '';
 
-        sortedIndices.forEach((i) => {
-            const c = counters[i];
+        const filtered = counters.map((c, i) => ({...c, originalIndex: i}))
+                                .filter(c => c.name.toLowerCase().includes(searchTerm));
+
+        const activeProjects = filtered.filter(c => c.status !== 'completed').sort((a, b) => b.pinned - a.pinned);
+        const completedProjects = filtered.filter(c => c.status === 'completed');
+
+        compSection.style.display = completedProjects.length > 0 ? 'block' : 'none';
+
+        function createCard(c, i) {
             const isDone = c.count >= c.goal;
             const progress = Math.min(100, (c.count / (c.goal || 1)) * 100);
             let rpm = "0.0", rph = "0.0", estFinish = "Awaiting data...";
@@ -372,14 +397,17 @@
                 logHtml = dates.map(d => `<div class="stats-day"><span>${d}</span><span>${c.dailyLog[d]} rows</span></div>`).join('');
             }
 
-            list.innerHTML += `
-                <div class="counter-card ${isDone ? 'completed' : ''}">
+            return `
+                <div class="counter-card ${c.status === 'completed' ? 'completed-status' : ''} ${isDone && c.status !== 'completed' ? 'completed' : ''}">
                     <div class="counter-info">
                         <div>
                             <div class="counter-name">${c.pinned ? '📌 ' : ''}${c.name}</div>
                             <div class="history-info">Last update: ${c.lastUpdated}</div>
                         </div>
                         <div>
+                            <button class="btn-utility ${c.status === 'completed' ? 'active' : ''}" onclick="toggleComplete(${i})" title="Mark Complete">
+                                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </button>
                             <button class="btn-utility" onclick="shareProgress(${i})">
                                 <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                             </button>
@@ -412,13 +440,14 @@
                         <div class="progress-bar" style="width: ${progress}%"></div>
                     </div>
                     <div class="goal-text">${c.count} / ${c.goal} rows</div>
-
                     ${logHtml ? `<div class="stats-log">${logHtml}</div>` : ''}
-
                     <textarea class="notes-area" placeholder="Notes (hook, yarn...)" oninput="updateNotes(${i}, this.value)">${c.notes || ''}</textarea>
                 </div>
             `;
-        });
+        }
+
+        activeProjects.forEach(c => activeList.innerHTML += createCard(c, c.originalIndex));
+        completedProjects.forEach(c => completedList.innerHTML += createCard(c, c.originalIndex));
     }
 
     setInterval(() => { if (counters.some(c => c.startTime && c.showTimer)) render(); }, 30000);
