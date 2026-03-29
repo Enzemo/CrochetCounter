@@ -13,7 +13,7 @@
         .container { width: 100%; max-width: 450px; padding-bottom: 80px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%; }
         
-        /* Navigation */
+        /* Navigation Bar */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         .nav-item { flex: 1; text-align: center; color: var(--text); opacity: 0.5; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { opacity: 1; color: var(--primary); }
@@ -127,7 +127,7 @@
 <script>
     let counters = JSON.parse(localStorage.getItem('goalCounters')) || [];
     let isDark = localStorage.getItem('darkMode') !== 'false';
-    let currentView = 'active'; // 'active' or 'completed'
+    let currentView = 'active'; 
     let currentFocusIndex = null;
 
     if (!isDark) document.body.classList.remove('dark-mode');
@@ -233,6 +233,12 @@
         save(currentFocusIndex === null);
     }
 
+    function resetSession(index) {
+        counters[index].startTime = null;
+        counters[index].sessionStartCount = counters[index].count;
+        save();
+    }
+
     function exportData() {
         const blob = new Blob([JSON.stringify(counters, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -251,6 +257,21 @@
     function resetAll() { if(confirm("Clear ALL data?")) { counters = []; save(); } }
 
     function deleteCounter(index) { if(confirm("Delete this project?")) { counters.splice(index, 1); save(); } }
+
+    function shareProgress(index) {
+        const c = counters[index];
+        const progress = Math.min(100, (c.count / (c.goal || 1)) * 100).toFixed(0);
+        let shareText = `🧶 Project Update: ${c.name}\n📍 Total: ${c.count} / ${c.goal} rows (${progress}%)`;
+        if (c.dailyLog && Object.keys(c.dailyLog).length > 0) {
+            const sortedDates = Object.keys(c.dailyLog).sort().reverse();
+            const recentDays = sortedDates.slice(0, 3);
+            shareText += `\n\n📊 Recent Activity:`;
+            recentDays.forEach(date => { shareText += `\n- ${date}: +${c.dailyLog[date]} rows`; });
+        }
+        if (navigator.share) { navigator.share({ title: 'My Crochet Progress', text: shareText }).catch(() => copyToClipboard(shareText)); } else { copyToClipboard(shareText); }
+    }
+
+    function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert("Progress summary copied!")); }
 
     function render() {
         const list = document.getElementById('project-list');
@@ -271,6 +292,22 @@
             const i = c.originalIndex;
             const progress = Math.min(100, (c.count / (c.goal || 1)) * 100);
             
+            let rpm = "0.0", rph = "0.0", estFinish = "Awaiting data...";
+            if (c.showTimer && c.startTime) {
+                const sessionRows = c.count - c.sessionStartCount;
+                const elapsedMins = (Date.now() - c.startTime) / 60000;
+                if (sessionRows > 0 && elapsedMins > 0) {
+                    const rowsPerMin = sessionRows / elapsedMins;
+                    rpm = rowsPerMin.toFixed(1); rph = (rowsPerMin * 60).toFixed(1);
+                    const rowsLeft = c.goal - c.count;
+                    if (rowsLeft > 0) {
+                        const minsLeft = rowsLeft / rowsPerMin;
+                        const finishDate = new Date(Date.now() + minsLeft * 60000);
+                        estFinish = `${finishDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} on ${finishDate.toLocaleDateString([], { month: 'short', day: 'numeric' })}`;
+                    } else { estFinish = "Done! 🎉"; }
+                }
+            }
+
             let logHtml = "";
             if (c.dailyLog) {
                 const dates = Object.keys(c.dailyLog).sort().reverse();
@@ -288,11 +325,26 @@
                             <button class="btn-utility ${c.status === 'completed' ? 'active' : ''}" onclick="toggleComplete(${i})" title="Mark Complete">
                                 <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                             </button>
-                            <button class="btn-utility ${c.pinned ? 'active' : ''}" onclick="counters[${i}].pinned=!counters[${i}].pinned; save()">
+                            <button class="btn-utility" onclick="shareProgress(${i})" title="Share Progress">
+                                <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                            </button>
+                            <button class="btn-utility ${c.pinned ? 'active' : ''}" onclick="counters[${i}].pinned=!counters[${i}].pinned; save()" title="Pin Project">
                                 <svg viewBox="0 0 24 24"><path d="M16 9V4l1 0V2H7v2l1 0v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>
                             </button>
-                            <button class="btn-del" onclick="deleteCounter(${i})">✕</button>
+                            <button class="btn-utility ${c.showTimer ? 'active' : ''}" onclick="counters[${i}].showTimer=!counters[${i}].showTimer; save()" title="Toggle Timer">
+                                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                            </button>
+                            <button class="btn-utility ${c.locked ? 'active' : ''}" onclick="counters[${i}].locked=!counters[${i}].locked; save()" title="Lock Counter">
+                                <svg viewBox="0 0 24 24"><path d="${c.locked ? 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z' : 'M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z'}"/></svg>
+                            </button>
+                            <button class="btn-del" onclick="deleteCounter(${i})" title="Delete">✕</button>
                         </div>
+                    </div>
+
+                    <div class="timer-display" style="display: ${c.showTimer ? 'block' : 'none'}">
+                        <button class="btn-reset-session" onclick="resetSession(${i})">Reset Session</button>
+                        <b>Speed:</b> ${rpm} rpm | ${rph} rph<br>
+                        <b>Est. Completion:</b> ${estFinish}
                     </div>
 
                     <div class="controls ${c.locked ? 'locked' : ''}">
@@ -304,13 +356,15 @@
                     <div class="progress-container"><div class="progress-bar" style="width: ${progress}%"></div></div>
                     <div class="goal-text">${c.count} / ${c.goal} rows</div>
                     ${logHtml ? `<div class="stats-log">${logHtml}</div>` : ''}
-                    <textarea class="notes-area" placeholder="Notes..." oninput="counters[${i}].notes=this.value; save(false)">${c.notes || ''}</textarea>
+                    <textarea class="notes-area" placeholder="Notes (hook, yarn...)" oninput="counters[${i}].notes=this.value; save(false)">${c.notes || ''}</textarea>
                 </div>
             `;
         });
     }
 
+    setInterval(() => { if (counters.some(c => c.startTime && c.showTimer)) render(); }, 30000);
     render();
 </script>
 </body>
 </html>
+ 
